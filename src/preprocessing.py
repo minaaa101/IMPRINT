@@ -1,5 +1,6 @@
 import os
 import cv2
+import numpy as np
 
 def validate_image_file(image_path):
     """
@@ -25,18 +26,23 @@ def validate_image_file(image_path):
 def load_image(image_path):
     """
     이미지 파일을 OpenCV로 불러오는 함수.
+    한글 파일명도 처리할 수 있다.
 
     Args:
         image_path (str): 이미지 파일 경로
-    
+
     Returns:
-        numpy.ndarray: 불러온 이미지
+        numpy.ndarray: BGR 형식의 이미지
     """
-    image = cv2.imread(image_path)
+
+    data = np.fromfile(image_path, dtype=np.uint8)
+    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
 
     if image is None:
-        raise ValueError(f"이미지 파일을 찾을 수 없습니다: {image_path}")
-    
+        raise ValueError(
+            f"이미지 파일을 찾을 수 없습니다: {image_path}"
+        )
+
     return image
 
 def resize_image(image, size=(224, 224)):
