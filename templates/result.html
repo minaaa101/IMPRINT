@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>IMPRINT 분석 결과</title>
+</head>
+
+<body>
+
+    <h1>분석 결과</h1>
+
+    <img
+        src="{{ image_path }}"
+        width="300"
+        alt="분석 이미지"
+    >
+
+    <h2>화풍 유사도</h2>
+
+    <ul>
+
+        <li>
+            Ghibli :
+            {{ result.scores.Ghibli }}%
+        </li>
+
+        <li>
+            Disney :
+            {{ result.scores.Disney }}%
+        </li>
+
+        <li>
+            Simpsons :
+            {{ result.scores.Simpsons }}%
+        </li>
+
+    </ul>
+
+
+    <h2>
+        가장 유사한 화풍:
+        {{ result.best_style }}
+    </h2>
+
+
+    <a href="/">
+        다시 분석하기
+    </a>
+
+</body>
+
+</html>
