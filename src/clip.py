@@ -1,4 +1,5 @@
 import os
+
 import open_clip
 import torch
 from PIL import Image
@@ -9,6 +10,14 @@ from PIL import Image
 후에 데이터셋을 미리 embedding으로 변환해두고 저장한 후, 
 입력 이미지와 비교하는 방식으로 개선 필요
 """
+
+STYLE_DATASETS = {
+    "ghibli": "dataset/ghibli",
+    "disney": "dataset/disney",
+    "simpsons": "dataset/simpsons",
+}
+
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 def load_clip_model():
     """
@@ -64,6 +73,7 @@ def calculate_clip_similarity(embedding1, embedding2):
 
     return similarity
 
+
 def compare_with_dataset(
     input_embedding,
     dataset_path,
@@ -71,29 +81,31 @@ def compare_with_dataset(
     preprocess
 ):
     """
-    입력 이미지 embedding과 특정 화풍 데이터셋의
-    모든 이미지를 비교하여 평균 CLIP 유사도를 계산한다.
+    입력 이미지와 특정 화풍 데이터셋의 모든 이미지를 비교하고
+    평균 CLIP 유사도를 계산하는 함수.
 
     Args:
         input_embedding (torch.Tensor): 입력 이미지 embedding
-        dataset_path (str): 화풍 데이터셋 폴더 경로
+        dataset_path (str): 데이터셋 폴더 경로
         model: CLIP 이미지 인코더
         preprocess: CLIP 전용 이미지 전처리기
 
     Returns:
-        float: 데이터셋 이미지들과의 평균 CLIP 유사도
+        float: 데이터셋의 평균 CLIP cosine similarity
     """
     similarities = []
 
-    allowed_extensions = {".jpg", ".jpeg", ".png"}
-
     for filename in os.listdir(dataset_path):
+
         extension = os.path.splitext(filename)[1].lower()
 
-        if extension not in allowed_extensions:
+        if extension not in ALLOWED_EXTENSIONS:
             continue
 
-        image_path = os.path.join(dataset_path, filename)
+        image_path = os.path.join(
+            dataset_path,
+            filename
+        )
 
         dataset_embedding = get_image_embedding(
             image_path,
@@ -110,31 +122,68 @@ def compare_with_dataset(
 
     if not similarities:
         raise ValueError(
-            f"데이터셋에 분석 가능한 이미지가 없습니다: {dataset_path}"
+            f"분석 가능한 이미지가 없습니다: {dataset_path}"
         )
 
-    average_similarity = sum(similarities) / len(similarities)
+    average_similarity = (
+        sum(similarities) / len(similarities)
+    )
 
     return average_similarity
 
+def compare_all_styles(
+    input_embedding,
+    model,
+    preprocess
+):
+    """
+    입력 이미지를 모든 화풍 데이터셋과 비교하는 함수.
 
+    Returns:
+        dict: 화풍별 평균 CLIP cosine similarity
+    """
+    results = {}
+
+    for style, dataset_path in STYLE_DATASETS.items():
+
+        score = compare_with_dataset(
+            input_embedding,
+            dataset_path,
+            model,
+            preprocess
+        )
+
+        results[style] = score
+
+    return results
 
 if __name__ == "__main__":
     model, preprocess = load_clip_model()
 
-    # 사용자 입력 이미지
     input_embedding = get_image_embedding(
         "test.jpg",
         model,
         preprocess
     )
 
-    # 지브리 데이터셋과 비교
-    ghibli_score = compare_with_dataset(
+    results = compare_all_styles(
         input_embedding,
-        "data/ghibli",
         model,
         preprocess
     )
 
-    print("Ghibli CLIP 평균 유사도:", ghibli_score)
+    print("\nCLIP 분석 결과")
+
+    for style, score in results.items():
+        print(f"{style}: {score:.4f}")
+
+    # 가장 유사한 화풍 찾기
+    best_style = max(
+        results,
+        key=results.get
+    )
+
+    print(
+        "\n가장 유사한 화풍:",
+        best_style
+    )
