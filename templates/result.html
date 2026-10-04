@@ -1,53 +1,598 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <title>IMPRINT 분석 결과</title>
-</head>
+    <title>Result — IMPRINT</title>
 
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
 
-    <h1>분석 결과</h1>
+  <body>
 
-    <img
-        src="{{ image_path }}"
-        width="300"
-        alt="분석 이미지"
-    >
+    <!-- =========================
+         HEADER
+    ========================== -->
+    <header class="site-header">
 
-    <h2>화풍 유사도</h2>
+      <a class="brand" href="/">
+        IMPRINT
+      </a>
 
-    <ul>
+      <nav>
+        <a href="/">
+          Home
+        </a>
 
-        <li>
-            Ghibli :
-            {{ result.final_scores.Ghibli }}%
-        </li>
+        <a class="active" href="/analysis.html">
+          Analysis
+        </a>
 
-        <li>
-            Disney :
-            {{ result.final_scores.Disney }}%
-        </li>
+        <a href="/about.html">
+          About
+        </a>
+      </nav>
 
-        <li>
-            Simpsons :
-            {{ result.final_scores.Simpsons }}%
-        </li>
-
-    </ul>
-
-
-    <h2>
-        가장 유사한 화풍:
-        {{ result.best_style }}
-    </h2>
+    </header>
 
 
-    <a href="/">
-        다시 분석하기
-    </a>
+    <!-- =========================
+         MAIN
+    ========================= -->
+    <main class="page results">
 
-</body>
 
+      <!-- =========================
+           TITLE
+      ========================== -->
+      <div class="result-title">
+
+        <div>
+
+          <h1>
+            ANALYSIS RESULT
+          </h1>
+
+          <p>
+            분석이 완료되었습니다.
+            각 화풍과의 유사도를 확인해보세요.
+          </p>
+
+        </div>
+
+
+        <a href="/">
+          ↻ 다시 분석하기
+        </a>
+
+      </div>
+
+
+
+      <!-- =========================
+           SUMMARY
+      ========================== -->
+      <section class="summary">
+
+
+        <!-- =====================
+             INPUT IMAGE
+        ====================== -->
+        <article class="input-result">
+
+          <span class="overline">
+            INPUT IMAGE
+          </span>
+
+
+          <div class="crop crop-ghibli">
+
+            <img
+              class="stored-image"
+              src="{{ image_path }}"
+              alt="분석 이미지"
+            />
+
+          </div>
+
+        </article>
+
+
+
+        <!-- =====================
+             WINNER
+        ====================== -->
+        <article class="winner">
+
+          <span>
+            MOST SIMILAR STYLE
+          </span>
+
+
+          <strong>
+            {{ result.best_style }}
+          </strong>
+
+
+          <b>
+            {{ "%.2f"|format(result.final_scores[result.best_style]) }}%
+          </b>
+
+
+          <i>
+
+            <em
+              style="
+                width: {{ result.final_scores[result.best_style] }}%;
+              "
+            ></em>
+
+          </i>
+
+
+          <p>
+            입력 이미지의 전체적인 화풍이
+            <strong>{{ result.best_style }}</strong>
+            화풍과 가장 높은 유사도를 보입니다.
+          </p>
+
+        </article>
+
+
+
+        <!-- =====================
+             RANKING
+        ====================== -->
+        <article class="ranking">
+
+
+          <!-- =================
+               GHIBLI
+          ================== -->
+          <div class="rank">
+
+            <div class="crop crop-ghibli">
+
+              <img
+                src="{{ url_for('static', filename='assets/reference.png') }}"
+                alt=""
+              />
+
+            </div>
+
+
+            <span>
+
+              <strong>
+                Ghibli
+              </strong>
+
+
+              <b>
+                {{ "%.2f"|format(result.final_scores.Ghibli) }}%
+              </b>
+
+
+              <i>
+
+                <em
+                  style="
+                    width: {{ result.final_scores.Ghibli }}%;
+                    background: #5fb993;
+                  "
+                ></em>
+
+              </i>
+
+            </span>
+
+          </div>
+
+
+
+          <!-- =================
+               DISNEY
+          ================== -->
+          <div class="rank">
+
+            <div class="crop crop-disney">
+
+              <img
+                src="{{ url_for('static', filename='assets/reference.png') }}"
+                alt=""
+                style="transform: translateY(-8px);"
+              />
+
+            </div>
+
+
+            <span>
+
+              <strong>
+                Disney
+              </strong>
+
+
+              <b>
+                {{ "%.2f"|format(result.final_scores.Disney) }}%
+              </b>
+
+
+              <i>
+
+                <em
+                  style="
+                    width: {{ result.final_scores.Disney }}%;
+                    background: #5a9ee7;
+                  "
+                ></em>
+
+              </i>
+
+            </span>
+
+          </div>
+
+
+
+          <!-- =================
+               SIMPSONS
+          ================== -->
+          <div class="rank">
+
+            <div class="crop crop-simpsons">
+
+              <img
+                src="{{ url_for('static', filename='assets/reference.png') }}"
+                alt=""
+                style="transform: translateY(-45px);"
+              />
+
+            </div>
+
+
+            <span>
+
+              <strong>
+                Simpsons
+              </strong>
+
+
+              <b>
+                {{ "%.2f"|format(result.final_scores.Simpsons) }}%
+              </b>
+
+
+              <i>
+
+                <em
+                  style="
+                    width: {{ result.final_scores.Simpsons }}%;
+                    background: #f7bf38;
+                  "
+                ></em>
+
+              </i>
+
+            </span>
+
+          </div>
+
+
+        </article>
+
+      </section>
+
+
+
+      <!-- =========================
+           DETAILED METRICS
+      ========================== -->
+      <section class="metrics">
+
+
+        <span class="overline">
+          DETAILED METRICS
+        </span>
+
+
+        <div class="metric-grid">
+
+
+          <!-- =====================
+               COLOR HISTOGRAM
+          ====================== -->
+          <article>
+
+            <i class="coral">
+              C
+            </i>
+
+
+            <div>
+
+              <strong>
+                Color Histogram
+              </strong>
+
+
+              <small>
+                색상 분포 유사도
+              </small>
+
+
+              <!-- GHIBLI -->
+              <p class="metric-row">
+
+                <span>
+                  Ghibli
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.color_scores.Ghibli) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.color_scores.Ghibli }}%;
+                  "
+                ></em>
+              </div>
+
+
+              <!-- DISNEY -->
+              <p class="metric-row">
+
+                <span>
+                  Disney
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.color_scores.Disney) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.color_scores.Disney }}%;
+                  "
+                ></em>
+              </div>
+
+
+              <!-- SIMPSONS -->
+              <p class="metric-row">
+
+                <span>
+                  Simpsons
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.color_scores.Simpsons) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.color_scores.Simpsons }}%;
+                  "
+                ></em>
+              </div>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- =====================
+               CLIP
+          ====================== -->
+          <article>
+
+            <i class="blue">
+              E
+            </i>
+
+
+            <div>
+
+              <strong>
+                CLIP Similarity
+              </strong>
+
+
+              <small>
+                의미적 유사도
+              </small>
+
+
+              <!-- GHIBLI -->
+              <p class="metric-row">
+
+                <span>
+                  Ghibli
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.clip_scores.Ghibli * 100) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.clip_scores.Ghibli * 100 }}%;
+                  "
+                ></em>
+              </div>
+
+
+              <!-- DISNEY -->
+              <p class="metric-row">
+
+                <span>
+                  Disney
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.clip_scores.Disney * 100) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.clip_scores.Disney * 100 }}%;
+                  "
+                ></em>
+              </div>
+
+
+              <!-- SIMPSONS -->
+              <p class="metric-row">
+
+                <span>
+                  Simpsons
+                </span>
+
+                <b>
+                  {{ "%.2f"|format(result.clip_scores.Simpsons * 100) }}%
+                </b>
+
+              </p>
+
+              <div class="metric-bar">
+                <em
+                  style="
+                    width: {{ result.clip_scores.Simpsons * 100 }}%;
+                  "
+                ></em>
+              </div>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- =====================
+               LBP
+          ====================== -->
+          <article>
+
+            <i class="green">
+              L
+            </i>
+
+
+            <div>
+
+              <strong>
+                LBP
+              </strong>
+
+
+              <small>
+                질감 및 패턴 유사도
+              </small>
+
+
+              <!--
+                현재 LBP는 analyzer.py에
+                아직 연결되어 있지 않으므로
+                임시로 "-" 표시
+              -->
+
+
+              <!-- GHIBLI -->
+              <p class="metric-row">
+
+                <span>
+                  Ghibli
+                </span>
+
+                <b>
+                  -
+                </b>
+
+              </p>
+
+
+              <!-- DISNEY -->
+              <p class="metric-row">
+
+                <span>
+                  Disney
+                </span>
+
+                <b>
+                  -
+                </b>
+
+              </p>
+
+
+              <!-- SIMPSONS -->
+              <p class="metric-row">
+
+                <span>
+                  Simpsons
+                </span>
+
+                <b>
+                  -
+                </b>
+
+              </p>
+
+            </div>
+
+          </article>
+
+
+        </div>
+
+
+
+        <!-- =========================
+             WEIGHT INFORMATION
+        ========================== -->
+        <div class="weight-info">
+
+          <small>
+            FINAL SCORE = Color Histogram 30% + CLIP 70%
+          </small>
+
+        </div>
+
+      </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+    <script
+      src="{{ url_for('static', filename='js/app.js') }}"
+      defer
+    ></script>
+
+  </body>
 </html>
