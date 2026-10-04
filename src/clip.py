@@ -157,6 +157,29 @@ def compare_all_styles(
 
     return results
 
+
+def analyze_clip_image(image_path):
+    model, preprocess = load_clip_model()
+
+    input_embedding = get_image_embedding(
+        image_path,
+        model,
+        preprocess
+    )
+
+    results = compare_all_styles(
+        input_embedding,
+        model,
+        preprocess
+    )
+
+    return {
+        "Ghibli": results["ghibli"],
+        "Disney": results["disney"],
+        "Simpsons": results["simpsons"]
+    }
+
+
 if __name__ == "__main__":
     model, preprocess = load_clip_model()
 
