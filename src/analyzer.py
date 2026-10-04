@@ -2,7 +2,7 @@ from pathlib import Path
 
 from src.preprocessing import preprocess_image
 from src.color.colorhistogram import compare_with_dataset
-
+from src.clip import analyze_clip_image
 
 # 프로젝트 루트
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,28 +19,25 @@ STYLE_DATASETS = {
 }
 
 
+# 가중치
+COLOR_WEIGHT = 0.3
+CLIP_WEIGHT = 0.7
+
+
 def analyze_image(image_path):
     """
-    입력 이미지를 각 화풍 데이터셋과 비교하여
-    Color Histogram 기반 유사도를 계산한다.
-
-    Parameters
-    ----------
-    image_path : str
-        분석할 이미지 경로
-
-    Returns
-    -------
-    dict
-        화풍별 유사도와 가장 높은 화풍
+    Color Histogram과 CLIP을 결합하여
+    화풍별 최종 유사도를 계산한다.
     """
 
-    # 1. 입력 이미지 전처리
+    # -------------------------
+    # 1. Color Histogram
+    # -------------------------
+
     query_image = preprocess_image(image_path)
 
-    scores = {}
+    color_scores = {}
 
-    # 2. 각 화풍 데이터셋과 비교
     for style, dataset_path in STYLE_DATASETS.items():
 
         if not dataset_path.exists():
@@ -53,15 +50,47 @@ def analyze_image(image_path):
             str(dataset_path)
         )
 
-        scores[style] = round(score, 2)
+        color_scores[style] = score
 
-    # 3. 가장 높은 유사도의 화풍 선택
+
+    # -------------------------
+    # 2. CLIP
+    # -------------------------
+
+    clip_scores = analyze_clip_image(image_path)
+
+    # -------------------------
+    # 3. 최종 점수 계산
+    # -------------------------
+
+    final_scores = {}
+
+    for style in STYLE_DATASETS:
+
+        color_score = color_scores[style]
+
+        # CLIP이 0~1 범위라면 0~100으로 변환
+        clip_score = clip_scores[style] * 100
+
+        final_score = (
+            color_score * COLOR_WEIGHT
+            + clip_score * CLIP_WEIGHT
+        )
+
+        final_scores[style] = round(final_score, 2)
+
+    # -------------------------
+    # 4. 가장 유사한 화풍
+    # -------------------------
+
     best_style = max(
-        scores,
-        key=scores.get
+        final_scores,
+        key=final_scores.get
     )
 
     return {
-        "scores": scores,
+        "color_scores": color_scores,
+        "clip_scores": clip_scores,
+        "final_scores": final_scores,
         "best_style": best_style
     }
