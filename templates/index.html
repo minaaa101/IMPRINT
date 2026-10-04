@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>IMPRINT</title>
+</head>
+
+<body>
+
+    <h1>IMPRINT</h1>
+
+    <p>
+        AI 생성 이미지 화풍 분석
+    </p>
+
+    <form
+        action="/analyze"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <input
+            type="file"
+            name="image"
+            accept=".jpg,.jpeg,.png"
+            required
+        >
+
+        <button type="submit">
+            분석하기
+        </button>
+
+    </form>
+
+</body>
+
+</html>

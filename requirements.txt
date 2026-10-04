@@ -11,3 +11,4 @@ tifffile==2026.9.20
 open-clip-torch==3.3.0
 requests
 python-dotenv
+flask
