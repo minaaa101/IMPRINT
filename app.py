@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from pathlib import Path
 import uuid
 
@@ -7,6 +7,8 @@ from src.analyzer import analyze_image
 
 app = Flask(__name__)
 
+# session 사용을 위한 키
+app.secret_key = "imprint-secret-key"
 
 # =========================
 # 업로드 폴더
@@ -124,14 +126,12 @@ def run_analysis():
         )
 
 
+        # 결과 페이지에서 사용할 수 있도록 저장
+        session["analysis_result"] = result
+        session["image_path"] = image_path
+
         return jsonify({
-
-            "success": True,
-
-            "result": result,
-
-            "image_path": image_path
-
+            "success": True
         })
 
 
@@ -153,8 +153,17 @@ def run_analysis():
 @app.route("/result")
 def result_page():
 
+    result = session.get("analysis_result")
+    image_path = session.get("image_path")
+
+    # 분석 없이 /result에 직접 접근한 경우
+    if result is None:
+        return "분석 결과가 없습니다. 이미지를 먼저 분석해주세요."
+
     return render_template(
-        "result.html"
+        "result.html",
+        result=result,
+        image_path=image_path
     )
 
 
