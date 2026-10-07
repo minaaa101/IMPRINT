@@ -1,0 +1,26 @@
+name: Sync to Hugging Face Spaces
+
+on:
+  push:
+    branches: [ main ] # GitHub 기본 브랜치가 master라면 master로 변경하세요.
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote rm hf 2>/dev/null || true
+          
+          # minaaa101 계정의 INPRINT 스페이스 주소를 원격 저장소로 등록합니다.
+          git remote add hf https://huggingface.co
+          
+          # Hugging Face Spaces로 강제 푸시하여 동기화합니다.
+          git push --force https://$HF_TOKEN@huggingface.co/spaces/minaaa101/INPRINT main
