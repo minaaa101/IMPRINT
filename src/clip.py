@@ -4,6 +4,7 @@ from pathlib import Path
 
 import open_clip
 import torch
+torch.set_num_threads(1)
 from PIL import Image
 
 STYLE_DATASETS = {
@@ -22,39 +23,40 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 @lru_cache(maxsize=1)
 def load_clip_model():
     """
-    CLIP 모델을 한 번 로드한 후 재사용한다.
+    CLIP 모델을 CPU에서 한 번 로드하고,
+    메모리 사용량을 줄이기 위해 FP16으로 변환한다.
     """
+    torch.set_num_threads(1)
+
     model, _, preprocess = open_clip.create_model_and_transforms(
         "ViT-B-32",
-        pretrained="openai"
+        pretrained="openai",
+        device="cpu",
     )
 
-    model.eval()
+    model = model.eval().half()
 
     return model, preprocess
 
 
 def get_image_embedding(image_path, model, preprocess):
     """
-    이미지 한 장을 CLIP embedding 벡터로 변환하는 함수.
-
-    Args:
-        image_path (str): 이미지 파일 경로
-        model: CLIP 이미지 인코더
-        preprocess: CLIP 전용 이미지 전처리기
-
-    Returns:
-        torch.Tensor: 정규화된 이미지 embedding
+    이미지를 CLIP embedding으로 변환한다.
     """
-    image = Image.open(image_path).convert("RGB")
+    with Image.open(image_path) as img:
+        image = preprocess(img.convert("RGB")).unsqueeze(0)
 
-    image = preprocess(image).unsqueeze(0)
+    image = image.half()
 
-    with torch.no_grad():
+    with torch.inference_mode():
         embedding = model.encode_image(image)
 
-    # 벡터 정규화
-    embedding = embedding / embedding.norm(dim=-1, keepdim=True)
+        # 유사도 계산과 기존 캐시 호환성을 위해 FP32로 변환
+        embedding = embedding.float()
+        embedding = embedding / embedding.norm(
+            dim=-1,
+            keepdim=True
+        )
 
     return embedding
 
@@ -225,35 +227,3 @@ def analyze_clip_image(image_path):
         "Disney": results["disney"],
         "Simpsons": results["simpsons"]
     }
-
-
-if __name__ == "__main__":
-    model, preprocess = load_clip_model()
-
-    input_embedding = get_image_embedding(
-        "test.jpg",
-        model,
-        preprocess
-    )
-
-    results = compare_all_styles(
-        input_embedding,
-        model,
-        preprocess
-    )
-
-    print("\nCLIP 분석 결과")
-
-    for style, score in results.items():
-        print(f"{style}: {score:.4f}")
-
-    # 가장 유사한 화풍 찾기
-    best_style = max(
-        results,
-        key=results.get
-    )
-
-    print(
-        "\n가장 유사한 화풍:",
-        best_style
-    )
